@@ -16,10 +16,12 @@
 <script setup lang="ts">
 import Card from '@/components/elements/Card.vue'
 import Spinner from '@/components/loading/Spinner.vue'
-import router from '@/router'
 import { logOut } from '@/utilities/auth'
+import { useRouter } from 'vue-router'
 
-logOut().finally(() => router.push('/'))
+const router = useRouter()
+
+logOut().finally(() => router.push({ name: 'home' }))
 </script>
 
 <style scoped lang="css"></style>

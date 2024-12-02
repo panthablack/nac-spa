@@ -1,11 +1,12 @@
-import HomeView from '@/views/public/HomeView.vue'
+import { GUARDS } from '@/config/constants'
 import type { RouteRecordRaw } from 'vue-router'
 
 export const guestRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: HomeView,
+    component: import('@/views/public/HomeView.vue'),
+    alias: '/home',
   },
   {
     path: '/about',
@@ -22,4 +23,4 @@ export const guestRoutes: RouteRecordRaw[] = [
     name: 'register',
     component: () => import('@/views/auth/RegisterView.vue'),
   },
-].map((r: RouteRecordRaw) => ({ ...r, meta: { ...(r.meta || {}), guard: 'guest' } }))
+].map((r: RouteRecordRaw) => ({ ...r, meta: { ...(r.meta || {}), guard: GUARDS.GUEST } }))

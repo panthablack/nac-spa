@@ -1,3 +1,4 @@
+import { GUARDS } from '@/config/constants'
 import type { RouteRecordRaw } from 'vue-router'
 
 export const authRoutes: RouteRecordRaw[] = [
@@ -11,4 +12,4 @@ export const authRoutes: RouteRecordRaw[] = [
     name: 'logout',
     component: () => import('@/views/auth/LogoutView.vue'),
   },
-].map((r: RouteRecordRaw) => ({ ...r, meta: { ...(r.meta || {}), guard: 'auth' } }))
+].map((r: RouteRecordRaw) => ({ ...r, meta: { ...(r.meta || {}), guard: GUARDS.AUTHENTICATED } }))

@@ -9,25 +9,24 @@
 
 <script setup lang="ts">
 import LoginForm from '@/components/auth/LoginForm.vue'
-import router from '@/router'
-import { useAuthStore } from '@/stores/auth'
 import { logIn } from '@/utilities/auth'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const authStore = useAuthStore()
+const router = useRouter()
 
 const handleLoginSuccess = (v: any) => {
   console.log('handleLoginSuccess', v)
-  authStore.setUser(v.data)
-  router.push('/dashboard')
+  router.push({ name: 'dashboard' })
 }
 
 const loading = ref(false)
+
 const onSubmit = (v: Record<string, string>) => {
   loading.value = true
   logIn(v.email, v.password)
     .then((res) => handleLoginSuccess(res))
-    .catch(() => router.push('/login'))
+    .catch(() => router.push({ name: 'login' }))
     .finally(() => loading.value = false)
 }
 </script>

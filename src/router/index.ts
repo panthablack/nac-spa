@@ -3,7 +3,8 @@ import { authRoutes } from './authRoutes'
 import { guestRoutes } from './guestRoutes'
 import { utilityRoutes } from './utilityRoutes'
 import { useAuthStore } from '@/stores/auth'
-import type { User } from '@/types/auth'
+import { useBootStore } from '@/stores/boot'
+import { GUARDS } from '@/config/constants'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,10 +15,12 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  const user: User | null = authStore.user
-  if (!user && to.meta.guard === 'auth') next({ name: 'login' })
-  else if (!!user && to.meta.guard === 'guest') next({ name: 'dashboard' })
-  else next()
+  const bootStore = useBootStore()
+  if (bootStore.booting) next()
+  const isAuthenticated: boolean = authStore.isAuthenticated
+  if (!isAuthenticated && to.meta.guard === GUARDS.AUTHENTICATED) return next({ name: 'login' })
+  else if (isAuthenticated && to.meta.guard === GUARDS.GUEST) return next({ name: 'dashboard' })
+  else return next()
 })
 
 export default router

@@ -1,35 +1,52 @@
 <script setup lang="ts">
 import NavBarLink from '@/components/nav/NavBarLink.vue'
-import { useAuthStore } from '@/stores/auth'
+import { GUARDS } from '@/config/constants'
 import type { NavLinkType } from '@/types/nav'
 import { computed, type ComputedRef } from 'vue'
+import { useRoute } from 'vue-router'
 
-const authStore = useAuthStore()
+const route = useRoute()
 
-const links: Record<('authenticated' | 'guest'), Record<string, NavLinkType[]>> = {
+const links: Record<('authenticated' | 'default' | 'guest'), Record<string, NavLinkType[]>> = {
   authenticated: {
+    authLinks: [
+      { text: 'Log Out', to: '/logout' },
+    ],
     navLinks: [
       { text: 'Dashboard', to: '/dashboard' },
     ],
+  },
+  default: {
     authLinks: [
-      { text: 'Log Out', to: '/logout' },
-    ]
+      { text: 'Log In', to: '/login' },
+    ],
+    navLinks: [
+      { text: 'Home', to: '/' },
+    ],
   },
   guest: {
+    authLinks: [
+      { text: 'Log In', to: '/login' },
+      { text: 'Register', to: '/register' },
+    ],
     navLinks: [
       { text: 'Home', to: '/' },
       { text: 'About', to: '/about' },
     ],
-    authLinks: [
-      { text: 'Log In', to: '/login' },
-      { text: 'Register', to: '/register' },
-    ]
   }
 }
 
-const authLinks: ComputedRef<NavLinkType[]> = computed(() => authStore.user ? links.authenticated.authLinks : links.guest.authLinks)
+const authLinks: ComputedRef<NavLinkType[]> = computed(() => {
+  if (route.meta.guard == GUARDS.AUTHENTICATED) return links.authenticated.authLinks
+  else if (route.meta.guard == GUARDS.GUEST) return links.guest.authLinks
+  else return links.default.authLinks
+})
 
-const navLinks: ComputedRef<NavLinkType[]> = computed(() => authStore.user ? links.authenticated.navLinks : links.guest.navLinks)
+const navLinks: ComputedRef<NavLinkType[]> = computed(() => {
+  if (route.meta.guard == GUARDS.AUTHENTICATED) return links.authenticated.navLinks
+  else if (route.meta.guard == GUARDS.GUEST) return links.guest.navLinks
+  else return links.default.navLinks
+})
 
 </script>
 

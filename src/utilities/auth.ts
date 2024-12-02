@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { api } from '@/utilities/api'
 import { useAuthStore } from '@/stores/auth'
+import type { User } from '@/types/auth'
 
 export const apiLogIn = (email: string, password: string) =>
   new Promise((resolve, reject) => {
@@ -28,10 +29,13 @@ export const fetchCookie = () =>
 
 export const fetchUserData = () =>
   new Promise((resolve, reject) => {
+    const authStore = useAuthStore()
     console.debug('Fetching User Data')
     api('/user')
       .then(res => {
         console.debug('Successfully fetched User Data: ', res)
+        const userData: User = res?.data
+        authStore.setUser(userData)
         resolve(res)
       })
       .catch(e => reject(e))
