@@ -1,5 +1,5 @@
 <template>
-  <div class="LoadingSpinnerContainer">
+  <div class="LoadingSpinnerContainer flexCenter">
     <svg
       class="text-gray-300 animate-spin"
       viewBox="0 0 64 64"

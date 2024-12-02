@@ -5,7 +5,7 @@
       class="modalOverlay fixed top-0 left-0 z-50 h-full w-full bg-opacity-70 bg-slate-700"
       v-if="props.modelValue"
     >
-      <div class="modalContainer flex justify-center items-center h-full w-full">
+      <div class="modalContainer flexCenter h-full w-full">
         <div
           class="modalContentContainer rounded-md min-w-96 bg-gray-50"
           @mousedown="onModalClicked"

@@ -4,7 +4,7 @@
       v-if="authStore.user"
       class="mb-4"
     >Welcome {{ authStore.user.name }}</h1>
-    <PrimaryButton>Action</PrimaryButton>
+    <PrimaryButton @click="startNewGame">Start New Game</PrimaryButton>
   </div>
 </template>
 
@@ -13,4 +13,8 @@ import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+
+const startNewGame = () => {
+  alert('startNewGame')
+}
 </script>

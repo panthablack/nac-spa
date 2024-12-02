@@ -1,3 +1,7 @@
 .clickable {
   @apply cursor-pointer;
 }
+
+.flexCenter {
+  @apply flex items-center justify-center;
+}

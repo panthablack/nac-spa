@@ -1,8 +1,8 @@
 <template>
-  <div class="logoutPageContainer h-full flex align-middle items-center">
+  <div class="logoutPageContainer h-full align-middle flexCenter">
     <div class="cardContainer w-full">
       <Card class="m-6">
-        <div class="contentContainer flex items-center justify-center">
+        <div class="contentContainer flexCenter">
           <p>Logging Out</p>
           <div class="spinnerContainer mx-4">
             <Spinner />
