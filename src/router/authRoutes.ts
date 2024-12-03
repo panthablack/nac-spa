@@ -8,6 +8,11 @@ export const authRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/DashboardView.vue'),
   },
   {
+    path: '/games/:id',
+    name: 'play',
+    component: () => import('@/views/games/PlayView.vue'),
+  },
+  {
     path: '/logout',
     name: 'logout',
     component: () => import('@/views/auth/LogoutView.vue'),

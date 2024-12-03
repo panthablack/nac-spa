@@ -31,7 +31,7 @@ export const fetchUserData = () =>
   new Promise((resolve, reject) => {
     const authStore = useAuthStore()
     console.debug('Fetching User Data')
-    api('/user')
+    api('/user', undefined, true)
       .then(res => {
         console.debug('Successfully fetched User Data: ', res)
         const userData: User = res?.data

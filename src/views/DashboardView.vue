@@ -11,10 +11,18 @@
 <script setup lang="ts">
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useGamesStore } from '@/stores/games'
+import { api } from '@/utilities/api'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
+const gameStore = useGamesStore()
+const router = useRouter()
 
-const startNewGame = () => {
-  alert('startNewGame')
+const startNewGame = async () => {
+  const game = (await api('/games/store'))
+  if (!game) return
+  gameStore.setActiveGame(game)
+  router.push(`/games/${game.id}`)
 }
 </script>

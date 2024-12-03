@@ -18,7 +18,9 @@
   "author": "James J. E. Randall",
   "license": "MIT",
   "dependencies": {
+    "@types/lodash": "^4.17.13",
     "axios": "^1.7.8",
+    "lodash": "^4.17.21",
     "pinia": "^2.2.6",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
