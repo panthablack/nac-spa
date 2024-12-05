@@ -1,12 +1,13 @@
 <template>
-  <div class="loadingScreen h-full flexCenter font-semibold text-2xl">
-    <div class="loadingMessageContainer flex  gap-4">
-      <span>Loading</span>
-      <Spinner />
-    </div>
+  <div class="loadingScreen h-full flexCenter">
+    <LoadingMessage>{{ message || 'Loading' }}</LoadingMessage>
   </div>
 </template>
 
 <script setup lang="ts">
-import Spinner from '@/components/loading/Spinner.vue'
+import LoadingMessage from '@/components/loading/LoadingMessage.vue'
+
+defineProps<{
+  message: string
+}>()
 </script>

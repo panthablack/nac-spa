@@ -13,10 +13,8 @@ export const getApiOptions = (options: ApiOptions | undefined): ApiOptions | und
 
 const onApiError = (e: Error) => console.error(e)
 
-const onApiSuccess = (res: AxiosResponse, returnRes: boolean): any => {
-  const data = API_CONFIG.CAMELISE_INCOMING ? res?.data : camelise(res?.data)
-  return returnRes ? res : data
-}
+const onApiSuccess = (res: AxiosResponse, returnRes: boolean): any =>
+  returnRes ? res : API_CONFIG.CAMELISE_INCOMING ? camelise(res?.data) : res?.data
 
 export const getApiUrl = (target: string) => `${import.meta.env.VITE_API_ROOT_URL}/api${target}`
 
