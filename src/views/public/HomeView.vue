@@ -1,11 +1,15 @@
 <template>
   <PageContainer class="homePageContainer">
-    <PageHeading>Home</PageHeading>
-    <p>This is a home page.</p>
+    <div class="h-full flexCenter">
+      <Card class="bg-slate-800">
+        <NavBarLink to="/login">Go to Login Page</NavBarLink>
+      </Card>
+    </div>
   </PageContainer>
 </template>
 
 <script setup lang="ts">
+import Card from '@/components/elements/Card.vue'
+import NavBarLink from '@/components/nav/NavBarLink.vue'
 import PageContainer from '@/components/pages/PageContainer.vue'
-import PageHeading from '@/components/pages/PageHeading.vue'
 </script>

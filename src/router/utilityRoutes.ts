@@ -7,6 +7,7 @@ export const utilityRoutes: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: 'Error404',
     component: Error404,
+    meta: { title: '404' },
   },
   // ***********************************************************************************************
 ]

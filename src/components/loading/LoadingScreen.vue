@@ -8,6 +8,6 @@
 import LoadingMessage from '@/components/loading/LoadingMessage.vue'
 
 defineProps<{
-  message: string
+  message?: string
 }>()
 </script>

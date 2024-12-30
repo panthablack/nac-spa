@@ -1,3 +1,13 @@
+<template>
+  <RouterLink
+    :to="to"
+    active-class="linkActive"
+    class="navBarLink "
+  >
+    <slot />
+  </RouterLink>
+</template>
+
 <script setup lang="ts">
 import {
   RouterLink,
@@ -9,16 +19,6 @@ const { to } = defineProps<{
   to: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric
 }>()
 </script>
-
-<template>
-  <RouterLink
-    :to="to"
-    active-class="linkActive"
-    class="navBarLink "
-  >
-    <slot />
-  </RouterLink>
-</template>
 
 <style scoped lang="css">
 .navBarLink {

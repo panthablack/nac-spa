@@ -4,6 +4,7 @@ import { fetchUserData } from '@/utilities/auth'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { GUARDS } from '@/config/constants'
+import { AUTH_TYPES, DEFAULT_AUTH_TYPE } from '@/config/auth'
 
 export const useBootStore = defineStore('boot', () => {
   const router = useRouter()
@@ -14,6 +15,11 @@ export const useBootStore = defineStore('boot', () => {
   const setBooting = (v: boolean) => (booting.value = v)
 
   const getNextRoute = () => {
+    if (DEFAULT_AUTH_TYPE === AUTH_TYPES.NONE) return
+    else return getNextAuthRoute()
+  }
+
+  const getNextAuthRoute = () => {
     const authStore = useAuthStore()
     const isAuthenticated: boolean = authStore.isAuthenticated
     if (!isAuthenticated && route.meta.guard === GUARDS.AUTHENTICATED) return { name: 'login' }
@@ -30,7 +36,8 @@ export const useBootStore = defineStore('boot', () => {
 
   const boot = () => {
     setBooting(true)
-    fetchUserData().finally(() => onBootFinished())
+    if (DEFAULT_AUTH_TYPE === AUTH_TYPES.NONE) onBootFinished()
+    else fetchUserData().finally(() => onBootFinished())
   }
 
   return { booting, boot, setBooting }

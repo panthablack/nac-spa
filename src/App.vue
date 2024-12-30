@@ -9,21 +9,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { useRoute } from 'vue-router'
 import { useBootStore } from '@/stores/boot'
 import LoadingScreen from '@/components/loading/LoadingScreen.vue'
+import { useTitle } from '@/composables/useTitle'
 
 const bootStore = useBootStore()
-const route = useRoute()
-
 const booting = computed(() => bootStore.booting)
+bootStore.boot()
 
 const layout = computed(() => DefaultLayout)
 
-const title = computed(() => route.meta.title || import.meta.env.VITE_APP_NAME)
-watch(title, (t: string) => document.title = t)
-
-bootStore.boot()
+useTitle()
 </script>

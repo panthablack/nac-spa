@@ -1,7 +1,7 @@
 <template>
   <div class="defaultLayoutContainer layoutContainer">
     <header class="navBarContainer">
-      <NavBar />
+      <NavBar v-if="SHOW_NAV" />
     </header>
     <main>
       <div class="routerViewContainer h-full">
@@ -9,7 +9,7 @@
       </div>
     </main>
     <div class="footerContainer">
-      <Footer />
+      <Footer v-if="SHOW_FOOTER" />
     </div>
   </div>
 </template>
@@ -18,4 +18,6 @@
 import NavBar from '@/components/nav/NavBar.vue'
 import Footer from '@/components/nav/Footer.vue'
 import { RouterView } from 'vue-router'
+import { SHOW_FOOTER } from '@/config/nav'
+import { SHOW_NAV } from '@/config/nav'
 </script>
