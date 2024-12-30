@@ -43,12 +43,11 @@ const authStore = useAuthStore()
 const gamesStore = useGamesStore()
 const router = useRouter()
 const { listen } = useReverb()
-
-listen('schema-requests', 'ApiSchemaRequested', (e: any) => alert('It happened!' + ' ' + e?.message))
-// reverb.private('nac-lobby').listen('GameJoined', (e: Event) => {
-//   console.log('GameJoined', e)
-//   alert('Joined Game')
-// })
+listen('nac-lobby', 'GameJoined', (e: Event) => {
+  console.log('GameJoined', e)
+  alert('Joined Game')
+  gamesStore.fetchExistingGames()
+})
 
 gamesStore.fetchExistingGames()
 

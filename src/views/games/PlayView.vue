@@ -8,6 +8,7 @@
 <script setup lang="ts">
 import PageContainer from '@/components/pages/PageContainer.vue'
 import PageHeading from '@/components/pages/PageHeading.vue'
+import { useReverb } from '@/composables/useReverb'
 import { useGamesStore } from '@/stores/games'
 import type { Game } from '@/types/game'
 import { api } from '@/utilities/api'
@@ -17,10 +18,13 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 const gameStore = useGamesStore()
-
 const gameID = parseInt(String(route.params.id))
-
 const loading = ref(true)
+const { listen } = useReverb()
+listen('nac-lobby', 'GameJoined', (e: Event) => {
+  console.log('GameJoined', e)
+  alert('Joined Game')
+})
 
 const onGameFetchFailed = () => router.push({ name: 'dashboard' })
 

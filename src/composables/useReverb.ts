@@ -2,7 +2,7 @@ import Echo, { Channel } from 'laravel-echo'
 import Pusher from 'pusher-js'
 import { reactive } from 'vue'
 
-if (import.meta.env.DEV) Pusher.logToConsole = true
+Pusher.logToConsole = import.meta.env.DEV
 
 export type ListenCallback = (event: any) => void
 
