@@ -10,10 +10,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { useBootStore } from '@/stores/boot'
-import LoadingScreen from '@/components/loading/LoadingScreen.vue'
 import { useTitle } from '@/composables/useTitle'
+import LoadingScreen from '@/components/loading/LoadingScreen.vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
 const bootStore = useBootStore()
 const booting = computed(() => bootStore.booting)
