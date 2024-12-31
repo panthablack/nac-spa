@@ -1,11 +1,11 @@
-import { GUARDS } from '@/config/constants'
+import { GUARDS } from '@/enums/constants'
 import type { RouteRecordRaw } from 'vue-router'
 
 export const guestRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: import('@/views/public/HomeView.vue'),
+    component: () => import('@/views/public/HomeView.vue'),
     meta: { title: 'Home' },
     alias: '/home',
   },

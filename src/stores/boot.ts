@@ -3,8 +3,9 @@ import { defineStore } from 'pinia'
 import { fetchUserData } from '@/utilities/auth'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { GUARDS } from '@/config/constants'
-import { AUTH_TYPES, DEFAULT_AUTH_TYPE } from '@/config/auth'
+import { GUARDS } from '@/enums/constants'
+import { DEFAULT_AUTH_TYPE } from '@/config/auth'
+import { AUTH_TYPES } from '@/enums/auth'
 
 export const useBootStore = defineStore('boot', () => {
   const router = useRouter()
@@ -37,6 +38,7 @@ export const useBootStore = defineStore('boot', () => {
   const boot = () => {
     setBooting(true)
     if (DEFAULT_AUTH_TYPE === AUTH_TYPES.NONE) onBootFinished()
+    else if (!route.meta.guard || route.meta.guard === GUARDS.PUBLIC) onBootFinished()
     else fetchUserData().finally(() => onBootFinished())
   }
 

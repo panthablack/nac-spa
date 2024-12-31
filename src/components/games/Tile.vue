@@ -1,0 +1,43 @@
+<template>
+  <div
+    class="tileContainer w-32 h-32 flexCenter  font-bold text-4xl"
+    :class="stateClass"
+  >
+    {{ renderTile(tile) }}
+  </div>
+</template>
+
+<script setup lang="ts">
+import { TILE_STATES } from '@/enums/tiles'
+import { computed, type ComputedRef } from 'vue'
+
+const props = defineProps<{
+  tile: number
+}>()
+
+const { EMPTY, NOUGHT, CROSS } = TILE_STATES
+
+const renderTile = (tile: number): string => {
+  if (tile === EMPTY) return ' '
+  else if (tile === NOUGHT) return 'O'
+  else if (tile === CROSS) return 'X'
+  else return ''
+}
+
+const stateClass: ComputedRef<string> = computed((): string => {
+  const filledStates: number[] = [NOUGHT, CROSS]
+  if (props.tile === EMPTY) return 'empty'
+  else if (filledStates.includes(props.tile)) return 'filled'
+  else return ''
+})
+</script>
+
+<style scoped lang="css">
+.empty {
+  @apply bg-slate-100 text-slate-900;
+}
+
+.filled {
+  @apply bg-slate-800 text-white;
+}
+</style>

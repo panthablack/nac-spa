@@ -1,4 +1,4 @@
-import { GUARDS } from '@/config/constants'
+import { GUARDS } from '@/enums/constants'
 import type { RouteRecordRaw } from 'vue-router'
 
 export const authRoutes: RouteRecordRaw[] = [

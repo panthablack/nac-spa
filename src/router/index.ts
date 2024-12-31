@@ -4,7 +4,7 @@ import { guestRoutes } from './guestRoutes'
 import { utilityRoutes } from './utilityRoutes'
 import { useAuthStore } from '@/stores/auth'
 import { useBootStore } from '@/stores/boot'
-import { GUARDS } from '@/config/constants'
+import { GUARDS } from '@/enums/constants'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
