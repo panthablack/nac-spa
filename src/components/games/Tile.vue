@@ -1,6 +1,6 @@
 <template>
   <div
-    class="tileContainer w-32 h-32 flexCenter  font-bold text-4xl"
+    class="tileContainer w-32 h-32 flexCenter font-bold text-4xl transition-colors"
     :class="stateClass"
   >
     {{ renderTile(tile) }}
@@ -16,6 +16,7 @@ const props = defineProps<{
 }>()
 
 const { EMPTY, NOUGHT, CROSS } = TILE_STATES
+const filledStates: number[] = [NOUGHT, CROSS]
 
 const renderTile = (tile: number): string => {
   if (tile === EMPTY) return ' '
@@ -25,7 +26,6 @@ const renderTile = (tile: number): string => {
 }
 
 const stateClass: ComputedRef<string> = computed((): string => {
-  const filledStates: number[] = [NOUGHT, CROSS]
   if (props.tile === EMPTY) return 'empty'
   else if (filledStates.includes(props.tile)) return 'filled'
   else return ''
@@ -34,7 +34,7 @@ const stateClass: ComputedRef<string> = computed((): string => {
 
 <style scoped lang="css">
 .empty {
-  @apply bg-slate-100 text-slate-900;
+  @apply bg-slate-400 text-slate-900 hover:cursor-pointer hover:bg-slate-500;
 }
 
 .filled {
