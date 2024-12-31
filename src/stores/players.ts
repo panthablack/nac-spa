@@ -3,8 +3,12 @@ import { defineStore } from 'pinia'
 import type { Player, PlayerNumber } from '@/types/player'
 import { PLAYER_NUMBERS } from '@/enums/players'
 import { TILE_STATES } from '@/enums/tiles'
+import { useGamesStore } from './games'
 
 export const usePlayerStore = defineStore('players', () => {
+  // dependencies
+  const gameStore = useGamesStore()
+
   // state
   const players: Reactive<Record<PlayerNumber, Player | null>> = reactive({
     [PLAYER_NUMBERS.PLAYER_1]: null,
@@ -32,8 +36,10 @@ export const usePlayerStore = defineStore('players', () => {
     else setActivePlayer(PLAYER_NUMBERS.PLAYER_1)
   }
 
-  const handlePlayerVictory = (playerNumber: PlayerNumber) =>
+  const handlePlayerVictory = (playerNumber: PlayerNumber) => {
     alert(`Player ${playerNumber} has won!`)
+    gameStore.endGame()
+  }
 
   const setActivePlayer = (n: PlayerNumber | null) => (activePlayerNumber.value = n)
 

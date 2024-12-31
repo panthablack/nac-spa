@@ -6,6 +6,7 @@ export type Game = {
   playerTwoId: number
   createdAt: string
   updatedAt: string
+  endedAt?: string
   playerOne?: User
   playerTwo?: User
 }

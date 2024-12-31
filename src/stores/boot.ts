@@ -42,11 +42,11 @@ export const useBootStore = defineStore('boot', () => {
     else router.push(nextRoute)
   }
 
-  const boot = () => {
+  const boot = async () => {
     setBooting(true)
     if (DEFAULT_AUTH_TYPE === AUTH_TYPES.NONE) onBootFinished()
-    else if (!route.meta.guard || route.meta.guard === GUARDS.PUBLIC) onBootFinished()
-    else fetchUserData().finally(() => onBootFinished())
+    else if (route.meta.guard === GUARDS.PUBLIC) onBootFinished()
+    else return await fetchUserData().finally(() => onBootFinished())
   }
 
   // interface

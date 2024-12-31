@@ -1,11 +1,17 @@
 <template>
-  <PageContainer class="playViewContainer">
-    <PageHeading>Play</PageHeading>
-    <p>This is a play page for game {{ gameID }}.</p>
+  <PageContainer class="playViewContainer h-full flex flex-col justify-between">
+    <div class="playHeaderContainer">
+      <PageHeading>Play</PageHeading>
+      <p>This is a play page for game {{ gameID }}.</p>
+    </div>
+    <div class="h-full flexCenter">
+      <Board />
+    </div>
   </PageContainer>
 </template>
 
 <script setup lang="ts">
+import Board from '@/components/games/Board.vue'
 import PageContainer from '@/components/pages/PageContainer.vue'
 import PageHeading from '@/components/pages/PageHeading.vue'
 import { useReverb } from '@/composables/useReverb'
@@ -28,8 +34,7 @@ listen('nac-lobby', 'GameJoined', (e: Event) => {
 
 const onGameFetchFailed = () => router.push({ name: 'dashboard' })
 
-const onCreated = async () => {
-  loading.value = true
+const loadGame = async () => {
   // if correct game loaded, return as no further setup necessary
   if (gameID === gameStore.activeGame?.id) return
   // try to load correct game
@@ -38,6 +43,8 @@ const onCreated = async () => {
   if (!game || gameID !== game.id) onGameFetchFailed()
   else gameStore.setActiveGame(game)
 }
+
+const onCreated = async () => await loadGame()
 
 onCreated().finally(() => loading.value = false)
 </script>

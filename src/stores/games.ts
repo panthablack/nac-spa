@@ -17,6 +17,14 @@ export const useGamesStore = defineStore('games', () => {
   const existingGames = computed(() => existingGamesPaginated.value?.data || [])
 
   // methods
+  const endGame = () => {
+    // if no active game, do nothing
+    if (!activeGame.value) return
+    // else set ended at date
+    activeGame.value.endedAt = Date.now().toLocaleString()
+    alert(`Game ended!`)
+  }
+
   const setActiveGame = (g: Game | null) => (activeGame.value = g)
 
   const fetchExistingGames = () =>
@@ -34,6 +42,7 @@ export const useGamesStore = defineStore('games', () => {
   // interface
   return {
     activeGame,
+    endGame,
     existingGames,
     fetchExistingGames,
     fetchingExistingGames,

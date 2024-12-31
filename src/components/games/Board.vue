@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import Tile from '@/components/games/Tile.vue'
-import { NUMBER_OF_COLUMNS } from '@/enums/board'
+import { NUMBER_OF_COLUMNS } from '@/config/board'
 import { TILE_STATES } from '@/enums/tiles'
 import { useBoardStore } from '@/stores/board'
 import { computed } from 'vue'
@@ -24,8 +24,10 @@ import { computed } from 'vue'
 const boardStore = useBoardStore()
 
 const onClick = (tile: number, index: number) => {
+  // if board inactive, do nothing
+  if (!boardStore.boardActive) return
   // if tile empty, update board state, else return
-  if (tile === TILE_STATES.EMPTY) return boardStore.updateboard(index)
+  else if (tile === TILE_STATES.EMPTY) return boardStore.updateboard(index)
   else return
 }
 

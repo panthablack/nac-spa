@@ -3,18 +3,20 @@ import { defineStore } from 'pinia'
 import { PLAYER_NUMBERS } from '@/enums/players'
 import { TILE_STATES } from '@/enums/tiles'
 import { usePlayerStore } from './players'
-import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from '@/enums/board'
+import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from '@/config/board'
+import { useGamesStore } from './games'
+import { someRowHasAllElementsEqualToValue, transposeArray } from '@/utilities/arrays'
 
 export const useBoardStore = defineStore('board', () => {
   // dependencies
   const playerStore = usePlayerStore()
+  const gameStore = useGamesStore()
   const numTiles = NUMBER_OF_ROWS * NUMBER_OF_COLUMNS
 
   // state
   const board: Ref<number[]> = ref(new Array(numTiles))
 
   // getters
-
   const boardMatrix: ComputedRef<number[][]> = computed(() => {
     const matrix = new Array(NUMBER_OF_ROWS).fill(null)
     matrix.forEach((r: number[], ri) => {
@@ -28,24 +30,23 @@ export const useBoardStore = defineStore('board', () => {
     return matrix
   })
 
+  const noMoreMovesCanBeMade: ComputedRef<boolean> = computed(
+    () => !board.value.includes(TILE_STATES.EMPTY)
+  )
+
+  const boardActive: ComputedRef<boolean> = computed(() => !gameStore.activeGame?.endedAt)
+
   // methods
   const getBoardIndexFromMatrixPosition = (row: number, col: number) =>
     row * NUMBER_OF_COLUMNS + col
 
-  const aColumnHasAllTilesOfType = (t: number): boolean => !t
+  const aColumnHasAllTilesOfType = (t: number): boolean =>
+    someRowHasAllElementsEqualToValue(transposeArray(boardMatrix.value), t)
 
   const aDiagonalHasAllTilesOfType = (t: number): boolean => !t
 
-  const aRowHasAllTilesOfType = (t: number): boolean => {
-    return boardMatrix.value.reduce((ra, rv) => {
-      if (ra === true) return true
-      else
-        return rv.reduce((ca, cv) => {
-          if (ca === false) return false
-          else return cv === t
-        }, true)
-    }, false)
-  }
+  const aRowHasAllTilesOfType = (t: number): boolean =>
+    someRowHasAllElementsEqualToValue(boardMatrix.value, t)
 
   const tileTypeWinConditionExists = (t: number): boolean => {
     // check rows
@@ -63,6 +64,11 @@ export const useBoardStore = defineStore('board', () => {
     else return false
   }
 
+  const handleDrawCondition = () => {
+    alert(`It's a draw!`)
+    gameStore.endGame()
+  }
+
   const resetBoard = () => {
     board.value.fill(TILE_STATES.EMPTY)
     playerStore.setActivePlayer(PLAYER_NUMBERS.PLAYER_1)
@@ -72,12 +78,14 @@ export const useBoardStore = defineStore('board', () => {
     board.value[index] = playerStore.activePlayerTile
     if (!playerStore.activePlayerNumber) return
     else if (currentPlayerHasWon()) playerStore.handlePlayerVictory(playerStore.activePlayerNumber)
+    else if (noMoreMovesCanBeMade.value) handleDrawCondition()
     else playerStore.changePlayer()
   }
 
   // interface
   return {
     board,
+    boardActive,
     resetBoard,
     updateboard,
   }
