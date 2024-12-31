@@ -19,25 +19,31 @@ export const usePlayerStore = defineStore('players', () => {
     else return players[activePlayerNumber.value]
   })
 
-  const currentPlayerTile: ComputedRef<number> = computed(() => {
+  const activePlayerTile: ComputedRef<number> = computed(() => {
     if (activePlayerNumber.value === PLAYER_NUMBERS.PLAYER_1) return TILE_STATES.CROSS
     else if (activePlayerNumber.value === PLAYER_NUMBERS.PLAYER_2) return TILE_STATES.NOUGHT
     else return TILE_STATES.EMPTY
   })
 
   // methods
-  const setActivePlayer = (n: PlayerNumber | null) => (activePlayerNumber.value = n)
-
   const changePlayer = () => {
     if (activePlayerNumber.value === PLAYER_NUMBERS.PLAYER_1)
       setActivePlayer(PLAYER_NUMBERS.PLAYER_2)
     else setActivePlayer(PLAYER_NUMBERS.PLAYER_1)
   }
 
+  const handlePlayerVictory = (playerNumber: PlayerNumber) =>
+    alert(`Player ${playerNumber} has won!`)
+
+  const setActivePlayer = (n: PlayerNumber | null) => (activePlayerNumber.value = n)
+
+  // interface
   return {
     activePlayer,
+    activePlayerNumber,
+    activePlayerTile,
     changePlayer,
-    currentPlayerTile,
+    handlePlayerVictory,
     setActivePlayer,
   }
 })

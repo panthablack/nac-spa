@@ -8,13 +8,16 @@ type ExistingGamesPaginated = {
 } | null
 
 export const useGamesStore = defineStore('games', () => {
+  // state
   const activeGame: Ref<Game | null> = ref(null)
   const existingGamesPaginated: Ref<ExistingGamesPaginated> = ref(null)
   const fetchingExistingGames: Ref<boolean> = ref(false)
 
-  const setActiveGame = (g: Game | null) => (activeGame.value = g)
-
+  // getters
   const existingGames = computed(() => existingGamesPaginated.value?.data || [])
+
+  // methods
+  const setActiveGame = (g: Game | null) => (activeGame.value = g)
 
   const fetchExistingGames = () =>
     new Promise((resolve, reject) => {
@@ -28,6 +31,7 @@ export const useGamesStore = defineStore('games', () => {
         .finally(() => (fetchingExistingGames.value = false))
     })
 
+  // interface
   return {
     activeGame,
     existingGames,

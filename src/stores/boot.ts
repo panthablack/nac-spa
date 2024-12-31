@@ -8,13 +8,18 @@ import { DEFAULT_AUTH_TYPE } from '@/config/auth'
 import { AUTH_TYPES } from '@/enums/auth'
 
 export const useBootStore = defineStore('boot', () => {
+  // dependencies
   const router = useRouter()
   const route = useRoute()
 
+  // state
   const booting: Ref<boolean> = ref(true)
 
-  const setBooting = (v: boolean) => (booting.value = v)
+  // getters
 
+  // ...
+
+  // methods
   const getNextRoute = () => {
     if (DEFAULT_AUTH_TYPE === AUTH_TYPES.NONE) return
     else return getNextAuthRoute()
@@ -27,6 +32,8 @@ export const useBootStore = defineStore('boot', () => {
     else if (isAuthenticated && route.meta.guard === GUARDS.GUEST) return { name: 'dashboard' }
     else return
   }
+
+  const setBooting = (v: boolean) => (booting.value = v)
 
   const onBootFinished = () => {
     setBooting(false)
@@ -42,5 +49,6 @@ export const useBootStore = defineStore('boot', () => {
     else fetchUserData().finally(() => onBootFinished())
   }
 
+  // interface
   return { booting, boot, setBooting }
 })

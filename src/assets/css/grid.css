@@ -1,0 +1,35 @@
+.gridCols1 {
+  @apply grid-cols-1;
+}
+
+.gridCols2 {
+  @apply grid-cols-2;
+}
+
+.gridCols3 {
+  @apply grid-cols-3;
+}
+
+.gridCols4 {
+  @apply grid-cols-4;
+}
+
+.gridCols5 {
+  @apply grid-cols-5;
+}
+
+.gridCols6 {
+  @apply grid-cols-6;
+}
+
+.gridCols7 {
+  @apply grid-cols-7;
+}
+
+.gridCols8 {
+  @apply grid-cols-8;
+}
+
+.gridCols9 {
+  @apply grid-cols-9;
+}
