@@ -1,24 +1,28 @@
 <template>
-  <PageContainer class="playViewContainer h-full flex flex-col justify-between">
-    <div class="playHeaderContainer">
-      <PageHeading>Play</PageHeading>
-      <p>This is a play page for game {{ gameID }}.</p>
+  <PageContainer class="playViewContainer h-full flex flex-col justify-between max-w-6xl m-auto">
+    <div class="playerHeaderContainer pt-4">
+      <PlayerCards
+        v-if="activeGame"
+        :game="activeGame"
+      />
     </div>
     <div class="h-full flexCenter">
-      <Board />
+      <Board v-if="activeGame" />
+      <LoadingMessage v-else>Loading Game</LoadingMessage>
     </div>
   </PageContainer>
 </template>
 
 <script setup lang="ts">
 import Board from '@/components/games/Board.vue'
+import LoadingMessage from '@/components/loading/LoadingMessage.vue'
 import PageContainer from '@/components/pages/PageContainer.vue'
-import PageHeading from '@/components/pages/PageHeading.vue'
+import PlayerCards from '@/components/players/PlayerCards.vue'
 import { useReverb } from '@/composables/useReverb'
 import { useGamesStore } from '@/stores/games'
 import type { Game } from '@/types/game'
 import { api } from '@/utilities/api'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -26,11 +30,10 @@ const router = useRouter()
 const gameStore = useGamesStore()
 const gameID = parseInt(String(route.params.id))
 const loading = ref(true)
+
+const activeGame = computed(() => gameStore.activeGame)
+
 const { listen } = useReverb()
-listen('nac-lobby', 'GameJoined', (e: Event) => {
-  console.log('GameJoined', e)
-  alert('Joined Game')
-})
 
 const onGameFetchFailed = () => router.push({ name: 'dashboard' })
 
@@ -46,5 +49,15 @@ const loadGame = async () => {
 
 const onCreated = async () => await loadGame()
 
-onCreated().finally(() => loading.value = false)
+onCreated()
+  .then(() => {
+    listen(`games.${activeGame.value?.id}`, 'GameJoined', (e: Event) => {
+      console.log('GameJoined', e)
+      alert('Joined Game')
+    }, true)
+  })
+  .catch(() => router.push('/dashboard'))
+  .finally(() => {
+    loading.value = false
+  })
 </script>

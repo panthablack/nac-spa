@@ -42,18 +42,27 @@ import { useReverb } from '@/composables/useReverb'
 const authStore = useAuthStore()
 const gamesStore = useGamesStore()
 const router = useRouter()
-const { listen } = useReverb()
+const { close, listen } = useReverb()
 listen('nac-lobby', 'GameJoined', (e: Event) => {
   console.log('GameJoined', e)
   alert('Joined Game')
   gamesStore.fetchExistingGames()
 })
 
+listen('nac-lobby', 'GameCreated', (e: Event) => {
+  console.log('GameCreated', e)
+  alert('GameCreated')
+  gamesStore.fetchExistingGames()
+})
+
 gamesStore.fetchExistingGames()
+
+const closeDashboardListeners = () => close('nac-lobby')
 
 const setGameAndStartPlaying = (game: Game) => {
   if (!game) return
   gamesStore.setActiveGame(game)
+  closeDashboardListeners()
   router.push(`/games/${game.id}`)
 }
 

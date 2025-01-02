@@ -1,3 +1,4 @@
+import axios from 'axios'
 import Echo, { Channel } from 'laravel-echo'
 import Pusher from 'pusher-js'
 import { reactive } from 'vue'
@@ -18,14 +19,33 @@ export type ReverbConfig = {
 
 export type UseReverbInterface = {
   channels: Record<string, Channel>
-  listen: (channelName: string, eventName: string, callback: ListenCallback) => Channel
+  close: (channelName: string, eventName?: string) => void
+  listen: (
+    channelName: string,
+    eventName: string,
+    callback: ListenCallback,
+    isPrivate?: boolean
+  ) => Channel
   reverb: Echo<'reverb'>
 }
 
 export const useReverb = (config?: ReverbConfig): UseReverbInterface => {
   const { broadcaster, key, wsHost, wsPort, wssPort, forceTLS, enabledTransports } = config || {}
 
+  const authURL = `${import.meta.env.VITE_API_ROOT_URL}/broadcasting/auth`
+  const axiosJSONHeaders = { 'Content-Type': 'application/json', Accept: 'application/json' }
+
   const reverb = new Echo({
+    authorizer: (channel: typeof Channel) => ({
+      authorize: (socketId: string, callback: Function) =>
+        axios(authURL, {
+          method: 'POST',
+          data: { socket_id: socketId, channel_name: channel.name },
+          headers: axiosJSONHeaders,
+        })
+          .then(res => callback(false, res.data))
+          .catch(e => console.error(e)),
+    }),
     broadcaster: broadcaster || 'reverb',
     options: { pusher: Pusher },
     key: key || import.meta.env.VITE_REVERB_APP_KEY,
@@ -38,20 +58,33 @@ export const useReverb = (config?: ReverbConfig): UseReverbInterface => {
 
   const channels: Record<string, Channel> = reactive({})
 
-  const makeNewChannel = (channelName: string): Channel =>
-    (channels[channelName] = reverb.channel(channelName))
+  const makeNewChannel = (channelName: string, isPrivate?: boolean): Channel =>
+    (channels[channelName] = isPrivate ? reverb.private(channelName) : reverb.channel(channelName))
 
-  const getOrMakeChannel = (channelName: string): Channel =>
-    channels[channelName] || makeNewChannel(channelName)
+  const getOrMakeChannel = (channelName: string, isPrivate?: boolean): Channel =>
+    channels[channelName] || makeNewChannel(channelName, isPrivate)
 
-  const listen = (channelName: string, eventName: string, callback: ListenCallback): Channel =>
-    getOrMakeChannel(channelName).listen(eventName, callback)
+  const listen = (
+    channelName: string,
+    eventName: string,
+    callback: ListenCallback,
+    isPrivate?: boolean
+  ): Channel => getOrMakeChannel(channelName, isPrivate).listen(eventName, callback)
 
-  // TESTING // ************************************************************************************
-  // channels.gibbon = reverb.channel('schema-requests')
-  // channels.gibbon.listen('ApiSchemaRequested', (e: string) => console.log('ApiSchemaRequested', e))
-  // channels.gibbon.listen('MessageSent', (e: string) => console.log('New Message', e))
-  // TESTING // ************************************************************************************
+  const close = (channelName: string, eventName?: string): void => {
+    if (channelName && eventName) closeEvent(channelName, eventName)
+    else if (channelName) closeChannel(channelName)
+    else throw new Error('cannot close unnamed event or channel isteners')
+  }
 
-  return { channels, listen, reverb }
+  const closeChannel = (channelName: string) => {
+    reverb.leaveChannel(channelName)
+    delete channels[channelName]
+  }
+
+  const closeEvent = (channelName: string, eventName: string) => {
+    channels[channelName].stopListening(eventName)
+  }
+
+  return { channels, close, listen, reverb }
 }
