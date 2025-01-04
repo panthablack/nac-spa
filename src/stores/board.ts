@@ -34,7 +34,9 @@ export const useBoardStore = defineStore('board', () => {
     () => !board.value.includes(TILE_STATES.EMPTY)
   )
 
-  const boardActive: ComputedRef<boolean> = computed(() => !gameStore.activeGame?.endedAt)
+  const boardActive: ComputedRef<boolean> = computed(
+    () => playerStore.player1Online && playerStore.player2Online
+  )
 
   // methods
   const getBoardIndexFromMatrixPosition = (row: number, col: number) =>

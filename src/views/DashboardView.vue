@@ -43,19 +43,6 @@ const authStore = useAuthStore()
 const gamesStore = useGamesStore()
 const router = useRouter()
 const { close, listen } = useReverb()
-listen('nac-lobby', 'GameJoined', (e: Event) => {
-  console.log('GameJoined', e)
-  alert('Joined Game')
-  gamesStore.fetchExistingGames()
-})
-
-listen('nac-lobby', 'GameCreated', (e: Event) => {
-  console.log('GameCreated', e)
-  alert('GameCreated')
-  gamesStore.fetchExistingGames()
-})
-
-gamesStore.fetchExistingGames()
 
 const closeDashboardListeners = () => close('nac-lobby')
 
@@ -69,6 +56,10 @@ const setGameAndStartPlaying = (game: Game) => {
 const onJoinGame = async (game: Game) =>
   setGameAndStartPlaying((await api(`/games/${game.id}/join`)))
 
-const startNewGame = async () =>
-  setGameAndStartPlaying((await api('/games/store')))
+const startNewGame = async () => setGameAndStartPlaying((await api('/games/store')))
+
+// on created actions
+listen('nac-lobby', 'GameJoined', () => gamesStore.fetchExistingGames())
+listen('nac-lobby', 'GameCreated', () => gamesStore.fetchExistingGames())
+gamesStore.fetchExistingGames()
 </script>

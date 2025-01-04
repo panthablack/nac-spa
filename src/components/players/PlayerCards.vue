@@ -1,5 +1,6 @@
 <template>
-  <div class="playerCardsContainer flex items-center justify-between">
+  <div
+    class="playerCardsContainer flex items-center justify-between flex-col lg:flex-row p-4 gap-2">
     <div class="player1CardContainer">
       <PlayerInfoCard
         v-if="player1"
@@ -7,7 +8,7 @@
       />
       <WaitingForPlayerCard
         v-else
-        playerNumber="1"
+        :playerNumber="1"
       />
     </div>
     <div class="player2CardContainer">
@@ -18,7 +19,7 @@
       />
       <WaitingForPlayerCard
         v-else
-        playerNumber="2"
+        :playerNumber="2"
       />
     </div>
   </div>
@@ -29,15 +30,13 @@ import PlayerInfoCard from '@/components/players/PlayerInfoCard.vue'
 import WaitingForPlayerCard from '@/components/players/WaitingForPlayerCard.vue'
 import { computed, type ComputedRef } from 'vue'
 import type { Player } from '@/types/player'
+import { usePlayerStore } from '@/stores/players'
 
-const player1: ComputedRef<Player | null> =
-  computed(() => ({ id: 1, name: 'Jack Beans', playerNumber: 1 }))
+const playerStore = usePlayerStore()
 
-const player2: ComputedRef<Player | null> = computed(() => null)
+const player1: ComputedRef<Player | null> = computed(() => (playerStore.player1))
 
-// const player2: ComputedRef<Player | null> =
-//   computed(() => ({ id: 1, name: 'Jill Beaufont', playerNumber: 2 }))
-
+const player2: ComputedRef<Player | null> = computed(() => (playerStore.player2))
 </script>
 
 <style scoped lang="css">

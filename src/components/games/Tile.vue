@@ -1,7 +1,7 @@
 <template>
   <div
     class="tileContainer w-32 h-32 flexCenter font-bold text-4xl transition-colors"
-    :class="`${stateClass} ${boardInativeClass}`"
+    :class="`${stateClass} ${boardInativeClass} ${notUsersTurnClass}`"
   >
     {{ renderTile(tile) }}
   </div>
@@ -10,9 +10,11 @@
 <script setup lang="ts">
 import { TILE_STATES } from '@/enums/tiles'
 import { useBoardStore } from '@/stores/board'
+import { usePlayerStore } from '@/stores/players'
 import { computed, type ComputedRef } from 'vue'
 
 const boardStore = useBoardStore()
+const playerStore = usePlayerStore()
 
 const props = defineProps<{
   tile: number
@@ -32,6 +34,10 @@ const boardInativeClass: ComputedRef<string> = computed((): string => {
   if (!boardStore.boardActive) return 'boardInactive'
   else return ''
 })
+const notUsersTurnClass: ComputedRef<string> = computed((): string => {
+  if (!playerStore.activePlayerIsAuthUser) return 'notUsersTurn'
+  else return ''
+})
 
 const stateClass: ComputedRef<string> = computed((): string => {
   if (props.tile === EMPTY) return 'empty'
@@ -46,7 +52,11 @@ const stateClass: ComputedRef<string> = computed((): string => {
 }
 
 .empty.boardInactive {
-  @apply hover:cursor-auto hover:bg-slate-400;
+  @apply hover:cursor-auto bg-slate-200 hover:bg-slate-200;
+}
+
+.notUsersTurn {
+  @apply hover:cursor-auto;
 }
 
 .filled {

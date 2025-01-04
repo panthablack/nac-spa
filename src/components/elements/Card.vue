@@ -1,5 +1,5 @@
 <template>
-  <div class="cardContainer p-4 rounded-md bg-gray-200 border-2 border-gray-300 mx-auto max-w-xl">
+  <div class="cardContainer p-4 rounded-md bg-gray-200 border-2 border-gray-300 mx-auto">
     <slot />
   </div>
 </template>

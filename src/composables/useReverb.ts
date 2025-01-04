@@ -1,5 +1,5 @@
 import axios from 'axios'
-import Echo, { Channel } from 'laravel-echo'
+import Echo, { Channel, type PresenceChannel } from 'laravel-echo'
 import Pusher from 'pusher-js'
 import { reactive } from 'vue'
 
@@ -20,6 +20,7 @@ export type ReverbConfig = {
 export type UseReverbInterface = {
   channels: Record<string, Channel>
   close: (channelName: string, eventName?: string) => void
+  join: (channelName: string) => PresenceChannel
   listen: (
     channelName: string,
     eventName: string,
@@ -58,11 +59,19 @@ export const useReverb = (config?: ReverbConfig): UseReverbInterface => {
 
   const channels: Record<string, Channel> = reactive({})
 
-  const makeNewChannel = (channelName: string, isPrivate?: boolean): Channel =>
-    (channels[channelName] = isPrivate ? reverb.private(channelName) : reverb.channel(channelName))
+  const presenceChannels: Record<string, PresenceChannel> = reactive({})
 
   const getOrMakeChannel = (channelName: string, isPrivate?: boolean): Channel =>
     channels[channelName] || makeNewChannel(channelName, isPrivate)
+
+  const getOrMakePresenceChannel = (channelName: string): PresenceChannel =>
+    presenceChannels[channelName] || makeNewPresenceChannel(channelName)
+
+  const makeNewChannel = (channelName: string, isPrivate?: boolean): Channel =>
+    (channels[channelName] = isPrivate ? reverb.private(channelName) : reverb.channel(channelName))
+
+  const makeNewPresenceChannel = (channelName: string): PresenceChannel =>
+    (channels[channelName] = reverb.join(channelName))
 
   const listen = (
     channelName: string,
@@ -70,6 +79,8 @@ export const useReverb = (config?: ReverbConfig): UseReverbInterface => {
     callback: ListenCallback,
     isPrivate?: boolean
   ): Channel => getOrMakeChannel(channelName, isPrivate).listen(eventName, callback)
+
+  const join = (channelName: string): PresenceChannel => getOrMakePresenceChannel(channelName)
 
   const close = (channelName: string, eventName?: string): void => {
     if (channelName && eventName) closeEvent(channelName, eventName)
@@ -86,5 +97,5 @@ export const useReverb = (config?: ReverbConfig): UseReverbInterface => {
     channels[channelName].stopListening(eventName)
   }
 
-  return { channels, close, listen, reverb }
+  return { channels, close, join, listen, reverb }
 }
