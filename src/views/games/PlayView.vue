@@ -19,29 +19,33 @@ import LoadingMessage from '@/components/loading/LoadingMessage.vue'
 import PageContainer from '@/components/pages/PageContainer.vue'
 import PlayerCards from '@/components/players/PlayerCards.vue'
 import { useReverb } from '@/composables/useReverb'
+import { useBoardStore } from '@/stores/board'
 import { useGamesStore } from '@/stores/games'
 import { usePlayerStore } from '@/stores/players'
 import type { User } from '@/types/auth'
 import type { Game } from '@/types/game'
 import type { Player } from '@/types/player'
 import { api } from '@/utilities/api'
+import { camelise } from '@/utilities/casify'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 const gameStore = useGamesStore()
+const boardStore = useBoardStore()
 const playerStore = usePlayerStore()
 const gameID = parseInt(String(route.params.id))
 
 const activeGame = computed(() => gameStore.activeGame)
 
-const { listen, join } = useReverb()
+const { join } = useReverb()
 
 const onGameFetchFailed = () => router.push({ name: 'dashboard' })
 
 const onGameFetchSuccess = async (game: Game) => {
   gameStore.setActiveGame(game)
+  await boardStore.loadBoard()
   await playerStore.loadPlayers()
 }
 
@@ -84,11 +88,18 @@ const onGameLeft = async (e: User) => {
   alert(`${e.name} has left the game`)
 }
 
+const onGameUpdated = async (e: { game: Game }) => {
+  // TODO: Events come in without being camelised at the moment - see if this can be overridden
+  const game: Game = camelise(e.game) as Game
+  gameStore.activeGame = game
+}
+
 onCreated()
   .then(() => {
-    listen(`games.${activeGame.value?.id}`, 'GameJoined', (e: User) => onGameJoined(e), true)
-    listen(`games.${activeGame.value?.id}`, 'GameLeft', (e: User) => onGameLeft(e), true)
     join(`games.${activeGame.value?.id}`)
+      .listen('GameJoined', (e: User) => onGameJoined(e))
+      .listen('GameLeft', (e: User) => onGameLeft(e))
+      .listen('BoardUpdated', (e: { game: Game }) => onGameUpdated(e))
       .here((e: User[]) => onHere(e))
       .joining((e: User) => onPlayerEnter(e))
       .leaving((e: User) => onPlayerExit(e))

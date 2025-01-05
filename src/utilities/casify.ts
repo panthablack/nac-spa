@@ -16,11 +16,11 @@ const casifyObject = (o: any, f: (s: string) => string) =>
     Object.entries(o).map(([k, v]): [string, any] => [f(k), canCasify(v) ? casify(v, f) : v])
   )
 
-export const casify = (o: any, f: (s: string) => string) => {
+export const casify = (o: any, f: (s: string) => string): any => {
   if (Array.isArray(o)) return casifyArray(o, f)
   else return casifyObject(o, f)
 }
 
-export const camelise = (o: any) => casify(o, CHANGE_CASE_FUNCTIONS.CAMEL_CASE)
+export const camelise = (o: any): any => casify(o, CHANGE_CASE_FUNCTIONS.CAMEL_CASE)
 
-export const snakify = (o: any) => casify(o, CHANGE_CASE_FUNCTIONS.SNAKE_CASE)
+export const snakify = (o: any): any => casify(o, CHANGE_CASE_FUNCTIONS.SNAKE_CASE)

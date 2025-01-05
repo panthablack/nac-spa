@@ -67,6 +67,10 @@ export const useBoardStore = defineStore('board', () => {
     else return false
   }
 
+  const loadBoard = async () => {
+    if (gameStore.activeGame?.boardState) board.value = gameStore.activeGame.boardState
+  }
+
   const handleDrawCondition = () => {
     alert(`It's a draw!`)
     gameStore.endGame()
@@ -78,8 +82,14 @@ export const useBoardStore = defineStore('board', () => {
   }
 
   const updateboard = (index: number) => {
+    // update internal state
     board.value[index] = playerStore.activePlayerTile
+
+    // update game state
+    gameStore.updateActiveGame(board.value)
+    // handle any win conditions
     if (!playerStore.activePlayerNumber) return
+    // TODO: update 'a player has won' check, so that it works on both screens
     else if (currentPlayerHasWon()) playerStore.handlePlayerVictory(playerStore.activePlayerNumber)
     else if (noMoreMovesCanBeMade.value) handleDrawCondition()
     else playerStore.changePlayer()
@@ -89,6 +99,7 @@ export const useBoardStore = defineStore('board', () => {
   return {
     board,
     boardActive,
+    loadBoard,
     resetBoard,
     updateboard,
   }
