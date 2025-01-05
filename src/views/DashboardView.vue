@@ -54,9 +54,9 @@ const setGameAndStartPlaying = (game: Game) => {
 }
 
 const onJoinGame = async (game: Game) =>
-  setGameAndStartPlaying((await api(`/games/${game.id}/join`)))
+  setGameAndStartPlaying((await api(`/games/${game.id}/join`, { method: 'POST' })))
 
-const startNewGame = async () => setGameAndStartPlaying((await api('/games/store')))
+const startNewGame = async () => setGameAndStartPlaying((await api('/games', { method: 'POST' })))
 
 // on created actions
 listen('nac-lobby', 'GameJoined', () => gamesStore.fetchExistingGames())

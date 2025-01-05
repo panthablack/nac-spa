@@ -56,9 +56,9 @@ const loadGame = async () => {
 const onCreated = async () => await loadGame()
 
 const onGameJoined = async (e: User) => {
-  alert('Joined Game')
   console.debug('onGameJoined: ', e)
   await loadGame()
+  // TODO: fix bug with possible race condition here by checking who is in the channel and updating the online statuses if possible
 }
 
 const updateUserOnlineStatus = (user: User, status: boolean) => {

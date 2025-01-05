@@ -4,8 +4,8 @@
     :class="`${reverseClass}`"
   >
     <AvatarWithOnlineStatus :online="playerIsOnline" />
-    <PlayerPieceIcon :playerNumber="player.playerNumber" />
     <span class="playerName font-semibold text-lg">{{ player.name }}</span>
+    <PlayerPieceIcon :playerNumber="player.playerNumber" />
   </Card>
 </template>
 

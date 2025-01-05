@@ -6,6 +6,7 @@ import { usePlayerStore } from './players'
 import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from '@/config/board'
 import { useGamesStore } from './games'
 import { someRowHasAllElementsEqualToValue, transposeArray } from '@/utilities/arrays'
+import type { BoardState } from '@/types/game'
 
 export const useBoardStore = defineStore('board', () => {
   // dependencies
@@ -14,7 +15,7 @@ export const useBoardStore = defineStore('board', () => {
   const numTiles = NUMBER_OF_ROWS * NUMBER_OF_COLUMNS
 
   // state
-  const board: Ref<number[]> = ref(new Array(numTiles))
+  const board: Ref<BoardState> = ref(new Array(numTiles))
 
   // getters
   const boardMatrix: ComputedRef<number[][]> = computed(() => {
