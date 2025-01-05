@@ -16,13 +16,14 @@
 
 <script setup lang="ts">
 import Tile from '@/components/games/Tile.vue'
-import { NUMBER_OF_COLUMNS } from '@/config/board'
 import { TILE_STATES } from '@/enums/tiles'
 import { useBoardStore } from '@/stores/board'
+import { useGamesStore } from '@/stores/games'
 import { usePlayerStore } from '@/stores/players'
 import { computed } from 'vue'
 
 const boardStore = useBoardStore()
+const gameStore = useGamesStore()
 const playerStore = usePlayerStore()
 
 const onClick = (tile: number, index: number) => {
@@ -35,9 +36,11 @@ const onClick = (tile: number, index: number) => {
   else return
 }
 
-const gridClass = computed(() => `grid gridCols${String(NUMBER_OF_COLUMNS)}`)
+const activeGame = computed(() => gameStore.activeGame)
 
-boardStore.resetBoard()
+const cols = computed(() => activeGame.value?.cols || 1)
+
+const gridClass = computed(() => `grid gridCols${String(cols.value)}`)
 </script>
 
 <style scoped lang="css"></style>

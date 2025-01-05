@@ -1,38 +1,41 @@
-import { computed, ref, type ComputedRef, type Ref } from 'vue'
+import { computed, type ComputedRef } from 'vue'
 import { defineStore } from 'pinia'
 import { PLAYER_NUMBERS } from '@/enums/players'
 import { TILE_STATES } from '@/enums/tiles'
-import { usePlayerStore } from './players'
-import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from '@/config/board'
+import { usePlayerStore } from '@/stores/players'
 import { useGamesStore } from './games'
 import { someRowHasAllElementsEqualToValue, transposeArray } from '@/utilities/arrays'
-import type { BoardState } from '@/types/game'
+import type { BoardState, Game } from '@/types/game'
 
 export const useBoardStore = defineStore('board', () => {
   // dependencies
   const playerStore = usePlayerStore()
   const gameStore = useGamesStore()
-  const numTiles = NUMBER_OF_ROWS * NUMBER_OF_COLUMNS
 
   // state
-  const board: Ref<BoardState> = ref(new Array(numTiles))
+  const board: ComputedRef<BoardState | null> = computed(
+    () => gameStore.activeGame?.boardState || null
+  )
 
   // getters
   const boardMatrix: ComputedRef<number[][]> = computed(() => {
-    const matrix = new Array(NUMBER_OF_ROWS).fill(null)
+    const game: Game | null = gameStore.activeGame
+    if (!board.value || !game) return []
+    const source: BoardState = board.value
+    const matrix = new Array(game.rows).fill(null)
     matrix.forEach((r: number[], ri) => {
       if (r) return
-      matrix[ri] = new Array(NUMBER_OF_COLUMNS).fill(null)
+      matrix[ri] = new Array(game.cols).fill(null)
       matrix[ri].forEach((c: number, ci: number) => {
         if (c) return
-        matrix[ri][ci] = board.value[getBoardIndexFromMatrixPosition(ri, ci)]
+        matrix[ri][ci] = source[getBoardIndexFromMatrixPosition(ri, ci, game.cols)]
       })
     })
     return matrix
   })
 
   const noMoreMovesCanBeMade: ComputedRef<boolean> = computed(
-    () => !board.value.includes(TILE_STATES.EMPTY)
+    () => !board.value?.includes(TILE_STATES.EMPTY)
   )
 
   const boardActive: ComputedRef<boolean> = computed(
@@ -40,8 +43,8 @@ export const useBoardStore = defineStore('board', () => {
   )
 
   // methods
-  const getBoardIndexFromMatrixPosition = (row: number, col: number) =>
-    row * NUMBER_OF_COLUMNS + col
+  const getBoardIndexFromMatrixPosition = (row: number, col: number, totalCols: number) =>
+    row * totalCols + col
 
   const aColumnHasAllTilesOfType = (t: number): boolean =>
     someRowHasAllElementsEqualToValue(transposeArray(boardMatrix.value), t)
@@ -67,24 +70,20 @@ export const useBoardStore = defineStore('board', () => {
     else return false
   }
 
-  const loadBoard = async () => {
-    if (gameStore.activeGame?.boardState) board.value = gameStore.activeGame.boardState
-  }
-
   const handleDrawCondition = () => {
     alert(`It's a draw!`)
     gameStore.endGame()
   }
 
   const resetBoard = () => {
-    board.value.fill(TILE_STATES.EMPTY)
+    gameStore.activeGame?.boardState?.fill(TILE_STATES.EMPTY)
     playerStore.setActivePlayer(PLAYER_NUMBERS.PLAYER_1)
   }
 
   const updateboard = (index: number) => {
+    if (!board.value) return
     // update internal state
     board.value[index] = playerStore.activePlayerTile
-
     // update game state
     gameStore.updateActiveGame(board.value)
     // handle any win conditions
@@ -99,7 +98,6 @@ export const useBoardStore = defineStore('board', () => {
   return {
     board,
     boardActive,
-    loadBoard,
     resetBoard,
     updateboard,
   }

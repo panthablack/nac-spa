@@ -6,6 +6,8 @@ export type Game = {
   playerTwoId: number
   boardState: BoardState
   createdAt: string
+  cols: number
+  rows: number
   updatedAt: string
   endedAt?: string
   playerOne?: User

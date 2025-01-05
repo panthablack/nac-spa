@@ -19,12 +19,11 @@ import LoadingMessage from '@/components/loading/LoadingMessage.vue'
 import PageContainer from '@/components/pages/PageContainer.vue'
 import PlayerCards from '@/components/players/PlayerCards.vue'
 import { useReverb } from '@/composables/useReverb'
-import { useBoardStore } from '@/stores/board'
+import { useAuthStore } from '@/stores/auth'
 import { useGamesStore } from '@/stores/games'
 import { usePlayerStore } from '@/stores/players'
 import type { User } from '@/types/auth'
 import type { Game } from '@/types/game'
-import type { Player } from '@/types/player'
 import { api } from '@/utilities/api'
 import { camelise } from '@/utilities/casify'
 import { computed } from 'vue'
@@ -32,56 +31,43 @@ import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 const gameStore = useGamesStore()
-const boardStore = useBoardStore()
 const playerStore = usePlayerStore()
-const gameID = parseInt(String(route.params.id))
+const gameId = parseInt(String(route.params.id))
 
 const activeGame = computed(() => gameStore.activeGame)
 
-const { join } = useReverb()
+const reverb = useReverb()
 
 const onGameFetchFailed = () => router.push({ name: 'dashboard' })
 
 const onGameFetchSuccess = async (game: Game) => {
   gameStore.setActiveGame(game)
-  await boardStore.loadBoard()
   await playerStore.loadPlayers()
 }
 
 const loadGame = async () => {
   // try to load correct game
-  const game: Game = (await api(`/games/${gameID}`))
+  const game: Game = (await api(`/games/${gameId}`))
   // if game fetch failed, handle cannot start game
-  if (!game || gameID !== game.id) onGameFetchFailed()
+  if (!game || gameId !== game.id) onGameFetchFailed()
   else return await onGameFetchSuccess(game)
 }
 
 const onCreated = async () => await loadGame()
 
-const onGameJoined = async (e: User) => {
+const onGameJoined = async (e: Game) => {
   console.debug('onGameJoined: ', e)
   await loadGame()
-  // TODO: fix bug with possible race condition here by checking who is in the channel and updating the online statuses if possible
 }
 
-const updateUserOnlineStatus = (user: User, status: boolean) => {
-  const player = playerStore.getPlayerFromUser(user)
-  if (player) playerStore.setPlayerOnline(player, status)
-}
+const onHere = async (e: User[]) => authStore.updateUserOnlineStatuses(e)
 
-const updateUserOnlineStatuses = (users: User[]) => {
-  console.debug('Setting user online statuses: ', users)
-  const players: Player[] = Object.values(playerStore.players).filter(v => !!v)
-  const isOnline = (p: Player) => !!users.find((u) => u.id === p.id)
-  players.forEach((p: Player) => playerStore.setPlayerOnline(p, isOnline(p)))
-}
+const onPlayerEnter = async (e: User) => authStore.updateUserOnlineStatus(e, true)
 
-const onHere = async (e: User[]) => updateUserOnlineStatuses(e)
+const onPlayerExit = async (e: User) => authStore.updateUserOnlineStatus(e, false)
 
-const onPlayerEnter = async (e: User) => updateUserOnlineStatus(e, true)
-
-const onPlayerExit = async (e: User) => updateUserOnlineStatus(e, false)
 
 const onGameLeft = async (e: User) => {
   console.debug('onGameLeft: ', e)
@@ -94,17 +80,19 @@ const onGameUpdated = async (e: { game: Game }) => {
   gameStore.activeGame = game
 }
 
+const setGameListeners = () => {
+  reverb
+    .join(`games.${gameId}`)
+    .listen('GameJoined', (e: Game) => onGameJoined(e))
+    .listen('GameLeft', (e: User) => onGameLeft(e))
+    .listen('BoardUpdated', (e: { game: Game }) => onGameUpdated(e))
+    .here((e: User[]) => onHere(e))
+    .joining((e: User) => onPlayerEnter(e))
+    .leaving((e: User) => onPlayerExit(e))
+    .error((e: Error) => console.error(e))
+}
+
 onCreated()
-  .then(() => {
-    join(`games.${activeGame.value?.id}`)
-      .listen('GameJoined', (e: User) => onGameJoined(e))
-      .listen('GameLeft', (e: User) => onGameLeft(e))
-      .listen('BoardUpdated', (e: { game: Game }) => onGameUpdated(e))
-      .here((e: User[]) => onHere(e))
-      .joining((e: User) => onPlayerEnter(e))
-      .leaving((e: User) => onPlayerExit(e))
-      .error((e: Error) => console.error(e))
-  }
-  )
+  .then(() => setGameListeners())
   .catch(() => router.push('/dashboard'))
 </script>

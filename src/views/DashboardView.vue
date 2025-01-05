@@ -18,9 +18,9 @@
         </div>
       </div>
       <ExistingGamesTable
-        v-if="gamesStore.existingGames && !gamesStore.fetchingExistingGames"
-        :games="gamesStore.existingGames"
-        :loading="gamesStore.fetchingExistingGames"
+        v-if="gameStore.existingGames && !gameStore.fetchingExistingGames"
+        :games="gameStore.existingGames"
+        :loading="gameStore.fetchingExistingGames"
         @join="onJoinGame"
       />
     </div>
@@ -31,7 +31,6 @@
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useGamesStore } from '@/stores/games'
-import { api } from '@/utilities/api'
 import { useRouter } from 'vue-router'
 import PageContainer from '@/components/pages/PageContainer.vue'
 import PageHeading from '@/components/pages/PageHeading.vue'
@@ -40,26 +39,25 @@ import type { Game } from '@/types/game'
 import { useReverb } from '@/composables/useReverb'
 
 const authStore = useAuthStore()
-const gamesStore = useGamesStore()
+const gameStore = useGamesStore()
 const router = useRouter()
 const { close, listen } = useReverb()
 
 const closeDashboardListeners = () => close('nac-lobby')
 
+const onJoinGame = async (game: Game) => setGameAndStartPlaying(await gameStore.join(game))
+
 const setGameAndStartPlaying = (game: Game) => {
   if (!game) return
-  gamesStore.setActiveGame(game)
+  gameStore.setActiveGame(game)
   closeDashboardListeners()
   router.push(`/games/${game.id}`)
 }
 
-const onJoinGame = async (game: Game) =>
-  setGameAndStartPlaying((await api(`/games/${game.id}/join`, { method: 'POST' })))
-
-const startNewGame = async () => setGameAndStartPlaying((await api('/games', { method: 'POST' })))
+const startNewGame = async () => setGameAndStartPlaying(await gameStore.startNewGame())
 
 // on created actions
-listen('nac-lobby', 'GameJoined', () => gamesStore.fetchExistingGames())
-listen('nac-lobby', 'GameCreated', () => gamesStore.fetchExistingGames())
-gamesStore.fetchExistingGames()
+listen('nac-lobby', 'GameJoined', () => gameStore.fetchExistingGames())
+listen('nac-lobby', 'GameCreated', () => gameStore.fetchExistingGames())
+gameStore.fetchExistingGames()
 </script>
