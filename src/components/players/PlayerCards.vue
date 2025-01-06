@@ -11,6 +11,7 @@
         :playerNumber="1"
       />
     </div>
+    <GameState v-if="showGameState" />
     <div class="player2CardContainer">
       <PlayerInfoCard
         v-if="player2"
@@ -31,12 +32,15 @@ import WaitingForPlayerCard from '@/components/players/WaitingForPlayerCard.vue'
 import { computed, type ComputedRef } from 'vue'
 import type { Player } from '@/types/player'
 import { usePlayerStore } from '@/stores/players'
+import GameState from '@/components/games/GameState.vue'
 
 const playerStore = usePlayerStore()
 
 const player1: ComputedRef<Player | null> = computed(() => (playerStore.player1))
 
 const player2: ComputedRef<Player | null> = computed(() => (playerStore.player2))
+
+const showGameState: ComputedRef<boolean> = computed(() => true)
 </script>
 
 <style scoped lang="css">

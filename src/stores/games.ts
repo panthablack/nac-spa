@@ -4,9 +4,9 @@ import type { Game, GameState } from '@/types/game'
 import { NEW_GAME_DEFAULTS } from '@/config/board'
 import { api } from '@/utilities/api'
 import { TILE_STATES } from '@/enums/tiles'
-import type { BoardState } from '@/types/board'
 import { GAME_STATES } from '@/enums/games'
 import { useBoardStore } from '@/stores/board'
+import { useReverb } from '@/composables/useReverb'
 
 type ExistingGamesPaginated = {
   data: Game[]
@@ -17,6 +17,7 @@ const { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } = NEW_GAME_DEFAULTS
 export const useGamesStore = defineStore('games', () => {
   // dependencies
   const boardStore = useBoardStore()
+  const reverb = useReverb()
 
   // state
   const activeGame: Ref<Game | null> = ref(null)
@@ -44,13 +45,12 @@ export const useGamesStore = defineStore('games', () => {
   }))
 
   // methods
-  const endGame = () => {
-    // if no active game, do nothing
-    if (!activeGame.value) return
-    // else set ended at date
+  const endGame = async () => {
+    // if no active game or game already ended, do nothing
+    if (!activeGame.value || !!activeGame.value.endedAt) return
+    // else set ended at date and update game
     activeGame.value.endedAt = Date.now().toLocaleString()
-    //
-    alert(`Game ended!`)
+    await updateActiveGame()
   }
 
   const fetchExistingGames = () =>
@@ -79,11 +79,14 @@ export const useGamesStore = defineStore('games', () => {
 
   const setActiveGame = (g: Game | null) => (activeGame.value = g)
 
-  const updateActiveGame = async (boardState: BoardState) => {
+  const updateActiveGame = async () => {
     if (!activeGame.value) return
     else {
+      reverb.presenceChannels[`games.${activeGame.value?.id}`].whisper('GameUpdated', {
+        game: activeGame.value,
+      })
       activeGame.value = await api(`/games/${activeGame.value.id}`, {
-        data: { boardState: boardState },
+        data: activeGame.value,
         method: 'PATCH',
       })
     }

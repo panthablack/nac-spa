@@ -5,7 +5,7 @@
       :class="gridClass"
     >
       <Tile
-        v-for="(tile, index) in boardStore.board"
+        v-for="(tile, index) in boardState"
         :key="index"
         :tile="tile"
         @click="onClick(tile, index)"
@@ -20,11 +20,16 @@ import { TILE_STATES } from '@/enums/tiles'
 import { useBoardStore } from '@/stores/board'
 import { useGamesStore } from '@/stores/games'
 import { usePlayerStore } from '@/stores/players'
+import type { BoardState } from '@/types/board'
 import { computed } from 'vue'
 
 const boardStore = useBoardStore()
 const gameStore = useGamesStore()
 const playerStore = usePlayerStore()
+
+defineProps<{
+  boardState: BoardState
+}>()
 
 const onClick = (tile: number, index: number) => {
   // if board inactive, do nothing

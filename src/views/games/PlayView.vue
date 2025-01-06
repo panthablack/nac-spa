@@ -5,20 +5,34 @@
         v-if="activeGame && playerStore.atleast1PlayerIsOnline"
         :game="activeGame"
       />
+      <div
+        class="playAgainContainer max-w-6xl m-auto flexCenter"
+        v-if="gameStore.currentGameState !== GAME_STATES.IN_PLAY"
+      >
+        <PrimaryButton
+          @click="router.push('/dashboard')"
+          class="text-xl font-bold bg-blue-500 text-slate-50 px-8 flexCenter hover:text-blue-600"
+        >Back to Dashboard</PrimaryButton>
+      </div>
     </div>
     <div class="h-full flexCenter">
-      <Board v-if="activeGame && playerStore.atleast1PlayerIsOnline" />
+      <Board
+        v-if="activeGame && playerStore.atleast1PlayerIsOnline"
+        :boardState="activeBoardState"
+      />
       <LoadingMessage v-else>Loading Game</LoadingMessage>
     </div>
   </PageContainer>
 </template>
 
 <script setup lang="ts">
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import Board from '@/components/games/Board.vue'
 import LoadingMessage from '@/components/loading/LoadingMessage.vue'
 import PageContainer from '@/components/pages/PageContainer.vue'
 import PlayerCards from '@/components/players/PlayerCards.vue'
 import { useReverb } from '@/composables/useReverb'
+import { GAME_STATES } from '@/enums/games'
 import { useAuthStore } from '@/stores/auth'
 import { useGamesStore } from '@/stores/games'
 import { usePlayerStore } from '@/stores/players'
@@ -37,6 +51,7 @@ const playerStore = usePlayerStore()
 const gameId = parseInt(String(route.params.id))
 
 const activeGame = computed(() => gameStore.activeGame)
+const activeBoardState = computed(() => activeGame.value?.boardState || [])
 
 const reverb = useReverb()
 
@@ -86,6 +101,7 @@ const setGameListeners = () => {
     .listen('GameJoined', (e: Game) => onGameJoined(e))
     .listen('GameLeft', (e: User) => onGameLeft(e))
     .listen('BoardUpdated', (e: { game: Game }) => onGameUpdated(e))
+    .listenForWhisper('GameUpdated', (e: { game: Game }) => onGameUpdated(e))
     .here((e: User[]) => onHere(e))
     .joining((e: User) => onPlayerEnter(e))
     .leaving((e: User) => onPlayerExit(e))

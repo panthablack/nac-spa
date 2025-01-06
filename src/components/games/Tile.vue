@@ -11,13 +11,14 @@
 import { TILE_STATES } from '@/enums/tiles'
 import { useBoardStore } from '@/stores/board'
 import { usePlayerStore } from '@/stores/players'
+import type { TileState } from '@/types/board'
 import { computed, type ComputedRef } from 'vue'
 
 const boardStore = useBoardStore()
 const playerStore = usePlayerStore()
 
 const props = defineProps<{
-  tile: number
+  tile: TileState
 }>()
 
 const { EMPTY, NOUGHT, CROSS } = TILE_STATES

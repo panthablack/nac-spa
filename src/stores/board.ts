@@ -14,9 +14,8 @@ export const useBoardStore = defineStore('board', () => {
   const gameStore = useGamesStore()
 
   // state
-  const board: ComputedRef<BoardState | null> = computed(
-    () => gameStore.activeGame?.boardState || null
-  )
+
+  // ..
 
   // getters
   const aPlayerHasWon: ComputedRef<boolean> = computed(() => {
@@ -33,13 +32,16 @@ export const useBoardStore = defineStore('board', () => {
   )
 
   const boardActive: ComputedRef<boolean> = computed(
-    () => playerStore.player1Online && playerStore.player2Online
+    () =>
+      gameStore.currentGameState === GAME_STATES.IN_PLAY &&
+      playerStore.player1Online &&
+      playerStore.player2Online
   )
 
   const boardMatrix: ComputedRef<number[][]> = computed(() => {
     const game: Game | null = gameStore.activeGame
-    if (!board.value || !game) return []
-    const source: BoardState = board.value
+    if (!game?.boardState || !game) return [[]]
+    const source: BoardState = game.boardState
     const matrix = new Array(game.rows).fill(null)
     matrix.forEach((r: number[], ri) => {
       if (r) return
@@ -53,7 +55,7 @@ export const useBoardStore = defineStore('board', () => {
   })
 
   const noMoreMovesCanBeMade: ComputedRef<boolean> = computed(
-    () => !board.value?.includes(TILE_STATES.EMPTY)
+    () => !gameStore.activeGame?.boardState?.includes(TILE_STATES.EMPTY)
   )
 
   // methods
@@ -69,6 +71,8 @@ export const useBoardStore = defineStore('board', () => {
     someRowHasAllElementsEqualToValue(boardMatrix.value, t)
 
   const tileTypeWinConditionExists = (t: number): boolean => {
+    // empty tiles cannot win, so if the tile passed is empty, return false
+    if (t === TILE_STATES.EMPTY) return false
     // check rows
     if (aRowHasAllTilesOfType(t)) return true
     // check cols
@@ -84,11 +88,11 @@ export const useBoardStore = defineStore('board', () => {
   }
 
   const updateboard = (index: number) => {
-    if (!board.value) return
+    if (!gameStore.activeGame?.boardState) return
     // update internal state
-    board.value[index] = playerStore.activePlayerTile
+    gameStore.activeGame.boardState[index] = playerStore.activePlayerTile
     // update game state if game still active
-    if (!gameStore.activeGame?.endedAt) gameStore.updateActiveGame(board.value)
+    if (!gameStore.activeGame?.endedAt) gameStore.updateActiveGame()
     // if game no longer in play, end the game
     if (gameStore.currentGameState !== GAME_STATES.IN_PLAY) gameStore.endGame()
   }
@@ -96,7 +100,6 @@ export const useBoardStore = defineStore('board', () => {
   // interface
   return {
     aPlayerHasWon,
-    board,
     boardActive,
     boardMatrix,
     noMoreMovesCanBeMade,

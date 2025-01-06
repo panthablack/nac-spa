@@ -7,7 +7,6 @@ import { useGamesStore } from './games'
 import { api } from '@/utilities/api'
 import { useAuthStore } from '@/stores/auth'
 import type { User } from '@/types/auth'
-import { useBoardStore } from '@/stores/board'
 import { getFrequenciesFromArray } from '@/utilities/arrays'
 import type { TileState } from '@/types/board'
 
@@ -17,7 +16,6 @@ const { EMPTY, NOUGHT, CROSS } = TILE_STATES
 export const usePlayerStore = defineStore('players', () => {
   // dependencies
   const authStore = useAuthStore()
-  const boardStore = useBoardStore()
   const gameStore = useGamesStore()
 
   // state
@@ -35,8 +33,8 @@ export const usePlayerStore = defineStore('players', () => {
   const activePlayerNumber: ComputedRef<PlayerNumber | null> = computed(() => {
     const p1Tile = playerTiles.value[PLAYER_1]
     const p2Tile = playerTiles.value[PLAYER_2]
-    if (!boardStore.board) return null
-    const map = getFrequenciesFromArray(boardStore.board)
+    if (!gameStore.activeGame?.boardState) return null
+    const map = getFrequenciesFromArray(gameStore.activeGame.boardState)
     const frequencies = Object.fromEntries(map)
     if (!frequencies || !frequencies[EMPTY]) return null
     else if (!frequencies[p1Tile] || frequencies[p1Tile] <= frequencies[p2Tile]) return PLAYER_1

@@ -62,5 +62,5 @@ export const useReverb = defineStore('reverb', () => {
   }
 
   // Interface
-  return { channels, close, init, join, listen, reverb, socketId }
+  return { channels, close, init, join, listen, presenceChannels, reverb, socketId }
 })
