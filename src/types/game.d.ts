@@ -1,3 +1,4 @@
+import type { GAME_STATES } from '@/enums/games'
 import type { User } from './auth'
 
 export type Game = {
@@ -14,4 +15,4 @@ export type Game = {
   playerTwo?: User
 }
 
-export type BoardState = number[]
+export type GameState = (typeof GAME_STATES)[keyof typeof GAME_STATES]

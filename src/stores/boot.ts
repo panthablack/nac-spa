@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { fetchUserData } from '@/utilities/auth'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { GUARDS } from '@/enums/constants'
+import { GUARDS } from '@/enums/guards'
 import { DEFAULT_AUTH_TYPE } from '@/config/auth'
 import { AUTH_TYPES } from '@/enums/auth'
 

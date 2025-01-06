@@ -5,14 +5,19 @@ import { PLAYER_NUMBERS } from '@/enums/players'
 import { TILE_STATES } from '@/enums/tiles'
 import { useGamesStore } from './games'
 import { api } from '@/utilities/api'
-import { useAuthStore } from './auth'
+import { useAuthStore } from '@/stores/auth'
 import type { User } from '@/types/auth'
+import { useBoardStore } from '@/stores/board'
+import { getFrequenciesFromArray } from '@/utilities/arrays'
+import type { TileState } from '@/types/board'
 
 const { PLAYER_1, PLAYER_2 } = PLAYER_NUMBERS
+const { EMPTY, NOUGHT, CROSS } = TILE_STATES
 
 export const usePlayerStore = defineStore('players', () => {
   // dependencies
   const authStore = useAuthStore()
+  const boardStore = useBoardStore()
   const gameStore = useGamesStore()
 
   // state
@@ -21,9 +26,23 @@ export const usePlayerStore = defineStore('players', () => {
     [PLAYER_2]: null,
   })
 
-  const activePlayerNumber: Ref<PlayerNumber | null> = ref(null)
+  const playerTiles: ComputedRef<Record<PlayerNumber, TileState>> = computed(() => ({
+    [PLAYER_1]: CROSS,
+    [PLAYER_2]: NOUGHT,
+  }))
 
   // getters
+  const activePlayerNumber: ComputedRef<PlayerNumber | null> = computed(() => {
+    const p1Tile = playerTiles.value[PLAYER_1]
+    const p2Tile = playerTiles.value[PLAYER_2]
+    if (!boardStore.board) return null
+    const map = getFrequenciesFromArray(boardStore.board)
+    const frequencies = Object.fromEntries(map)
+    if (!frequencies || !frequencies[EMPTY]) return null
+    else if (!frequencies[p1Tile] || frequencies[p1Tile] <= frequencies[p2Tile]) return PLAYER_1
+    else return PLAYER_2
+  })
+
   const activePlayer: ComputedRef<Player | null> = computed(() => {
     if (!activePlayerNumber.value) return null
     else return players[activePlayerNumber.value]
@@ -37,11 +56,7 @@ export const usePlayerStore = defineStore('players', () => {
     () => player1Online.value || player2Online.value
   )
 
-  const activePlayerTile: ComputedRef<number> = computed(() => {
-    if (activePlayerNumber.value === PLAYER_1) return TILE_STATES.CROSS
-    else if (activePlayerNumber.value === PLAYER_2) return TILE_STATES.NOUGHT
-    else return TILE_STATES.EMPTY
-  })
+  const activePlayerTile: ComputedRef<number> = computed(() => getPlayerTile(activePlayer.value))
 
   const player1: ComputedRef<Player | null> = computed(() => players[PLAYER_1])
 
@@ -55,12 +70,6 @@ export const usePlayerStore = defineStore('players', () => {
     if (player.playerNumber === PLAYER_1) return !!players[PLAYER_1] && player1Online.value
     else if (player.playerNumber === PLAYER_2) return !!players[PLAYER_2] && player2Online.value
     else return false
-  }
-
-  // methods
-  const changePlayer = () => {
-    if (activePlayerNumber.value === PLAYER_1) setActivePlayer(PLAYER_2)
-    else setActivePlayer(PLAYER_1)
   }
 
   const handlePlayerVictory = (playerNumber: PlayerNumber) => {
@@ -77,6 +86,12 @@ export const usePlayerStore = defineStore('players', () => {
   const getPlayerFromUser = (user: User): Player | null =>
     Object.values(players).find(p => p?.id === user.id) || null
 
+  const getPlayerTile = (player: Player | null): TileState => {
+    if (player?.playerNumber === PLAYER_1) return TILE_STATES.CROSS
+    else if (player?.playerNumber === PLAYER_2) return TILE_STATES.NOUGHT
+    else return TILE_STATES.EMPTY
+  }
+
   const loadPlayers = async () => {
     // if no active game, return
     if (!gameStore.activeGame) return
@@ -89,8 +104,6 @@ export const usePlayerStore = defineStore('players', () => {
     const p2 = fetched.find((p: Player) => p?.id === gameStore.activeGame?.playerTwoId)
     setPlayer(PLAYER_2, p2)
   }
-
-  const setActivePlayer = (n: PlayerNumber | null) => (activePlayerNumber.value = n)
 
   const setPlayer = (n: PlayerNumber, p: Player) => {
     if (!n) return
@@ -110,8 +123,8 @@ export const usePlayerStore = defineStore('players', () => {
     activePlayerNumber,
     activePlayerTile,
     atleast1PlayerIsOnline,
-    changePlayer,
     getPlayerFromUser,
+    getPlayerTile,
     handlePlayerVictory,
     loadPlayers,
     player1,
@@ -120,7 +133,6 @@ export const usePlayerStore = defineStore('players', () => {
     player2Online,
     playerIsOnline,
     players,
-    setActivePlayer,
     setPlayerOnline,
   }
 })

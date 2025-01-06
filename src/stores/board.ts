@@ -1,11 +1,12 @@
 import { computed, type ComputedRef } from 'vue'
 import { defineStore } from 'pinia'
-import { PLAYER_NUMBERS } from '@/enums/players'
 import { TILE_STATES } from '@/enums/tiles'
 import { usePlayerStore } from '@/stores/players'
 import { useGamesStore } from './games'
 import { someRowHasAllElementsEqualToValue, transposeArray } from '@/utilities/arrays'
-import type { BoardState, Game } from '@/types/game'
+import type { Game } from '@/types/game'
+import { GAME_STATES } from '@/enums/games'
+import type { BoardState } from '@/types/board'
 
 export const useBoardStore = defineStore('board', () => {
   // dependencies
@@ -18,6 +19,23 @@ export const useBoardStore = defineStore('board', () => {
   )
 
   // getters
+  const aPlayerHasWon: ComputedRef<boolean> = computed(() => {
+    if (tileTypeWinConditionExists(playerStore.activePlayerTile)) return true
+    else return false
+  })
+
+  const player1HasWon: ComputedRef<boolean> = computed(() =>
+    tileTypeWinConditionExists(playerStore.getPlayerTile(playerStore.player1))
+  )
+
+  const player2HasWon: ComputedRef<boolean> = computed(() =>
+    tileTypeWinConditionExists(playerStore.getPlayerTile(playerStore.player2))
+  )
+
+  const boardActive: ComputedRef<boolean> = computed(
+    () => playerStore.player1Online && playerStore.player2Online
+  )
+
   const boardMatrix: ComputedRef<number[][]> = computed(() => {
     const game: Game | null = gameStore.activeGame
     if (!board.value || !game) return []
@@ -36,10 +54,6 @@ export const useBoardStore = defineStore('board', () => {
 
   const noMoreMovesCanBeMade: ComputedRef<boolean> = computed(
     () => !board.value?.includes(TILE_STATES.EMPTY)
-  )
-
-  const boardActive: ComputedRef<boolean> = computed(
-    () => playerStore.player1Online && playerStore.player2Online
   )
 
   // methods
@@ -65,39 +79,29 @@ export const useBoardStore = defineStore('board', () => {
     else return false
   }
 
-  const currentPlayerHasWon = (): boolean => {
-    if (tileTypeWinConditionExists(playerStore.activePlayerTile)) return true
-    else return false
-  }
-
-  const handleDrawCondition = () => {
-    alert(`It's a draw!`)
-    gameStore.endGame()
-  }
-
   const resetBoard = () => {
     gameStore.activeGame?.boardState?.fill(TILE_STATES.EMPTY)
-    playerStore.setActivePlayer(PLAYER_NUMBERS.PLAYER_1)
   }
 
   const updateboard = (index: number) => {
     if (!board.value) return
     // update internal state
     board.value[index] = playerStore.activePlayerTile
-    // update game state
-    gameStore.updateActiveGame(board.value)
-    // handle any win conditions
-    if (!playerStore.activePlayerNumber) return
-    // TODO: update 'a player has won' check, so that it works on both screens
-    else if (currentPlayerHasWon()) playerStore.handlePlayerVictory(playerStore.activePlayerNumber)
-    else if (noMoreMovesCanBeMade.value) handleDrawCondition()
-    else playerStore.changePlayer()
+    // update game state if game still active
+    if (!gameStore.activeGame?.endedAt) gameStore.updateActiveGame(board.value)
+    // if game no longer in play, end the game
+    if (gameStore.currentGameState !== GAME_STATES.IN_PLAY) gameStore.endGame()
   }
 
   // interface
   return {
+    aPlayerHasWon,
     board,
     boardActive,
+    boardMatrix,
+    noMoreMovesCanBeMade,
+    player1HasWon,
+    player2HasWon,
     resetBoard,
     updateboard,
   }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import NavBarLink from '@/components/nav/NavBarLink.vue'
-import { GUARDS } from '@/enums/constants'
+import { GUARDS } from '@/enums/guards'
 import type { NavLinkType } from '@/types/nav'
 import { computed, type ComputedRef } from 'vue'
 import { useRoute } from 'vue-router'

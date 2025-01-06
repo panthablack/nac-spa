@@ -1,11 +1,12 @@
-import { computed, ref, type Ref } from 'vue'
+import { computed, ref, type ComputedRef, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { BoardState, Game } from '@/types/game'
+import type { Game, GameState } from '@/types/game'
 import { NEW_GAME_DEFAULTS } from '@/config/board'
 import { api } from '@/utilities/api'
-import { usePlayerStore } from '@/stores/players'
 import { TILE_STATES } from '@/enums/tiles'
-import { PLAYER_NUMBERS } from '@/enums/players'
+import type { BoardState } from '@/types/board'
+import { GAME_STATES } from '@/enums/games'
+import { useBoardStore } from '@/stores/board'
 
 type ExistingGamesPaginated = {
   data: Game[]
@@ -15,7 +16,7 @@ const { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } = NEW_GAME_DEFAULTS
 
 export const useGamesStore = defineStore('games', () => {
   // dependencies
-  const playerStore = usePlayerStore()
+  const boardStore = useBoardStore()
 
   // state
   const activeGame: Ref<Game | null> = ref(null)
@@ -23,6 +24,17 @@ export const useGamesStore = defineStore('games', () => {
   const fetchingExistingGames: Ref<boolean> = ref(false)
 
   // getters
+  const currentGameState: ComputedRef<GameState> = computed(() => {
+    // if draw, return DRAW
+    if (boardStore.noMoreMovesCanBeMade && !boardStore.aPlayerHasWon) return GAME_STATES.DRAW
+    // if player 1 has won, return PLAYER_1_WIN
+    else if (boardStore.player1HasWon) return GAME_STATES.PLAYER_1_WIN
+    // if player 2 has won, return PLAYER_2_WIN
+    else if (boardStore.player2HasWon) return GAME_STATES.PLAYER_2_WIN
+    // if no win state, return IN_PLAY
+    else return GAME_STATES.IN_PLAY
+  })
+
   const existingGames = computed(() => existingGamesPaginated.value?.data || [])
 
   const newGameDefaults = computed(() => ({
@@ -37,6 +49,7 @@ export const useGamesStore = defineStore('games', () => {
     if (!activeGame.value) return
     // else set ended at date
     activeGame.value.endedAt = Date.now().toLocaleString()
+    //
     alert(`Game ended!`)
   }
 
@@ -61,11 +74,8 @@ export const useGamesStore = defineStore('games', () => {
 
   const join = async (game: Game) => await api(`/games/${game.id}/join`, { method: 'POST' })
 
-  const startNewGame = async () => {
-    const res = await api('/games', { method: 'POST', data: newGameDefaults.value })
-    if (res) playerStore.setActivePlayer(PLAYER_NUMBERS.PLAYER_1)
-    return res
-  }
+  const startNewGame = async () =>
+    await api('/games', { method: 'POST', data: newGameDefaults.value })
 
   const setActiveGame = (g: Game | null) => (activeGame.value = g)
 
@@ -82,6 +92,7 @@ export const useGamesStore = defineStore('games', () => {
   // interface
   return {
     activeGame,
+    currentGameState,
     endGame,
     existingGames,
     fetchExistingGames,

@@ -1,5 +1,8 @@
 export type Array2D = any[][]
 
+export const getFrequenciesFromArray = (arr: any[]): Map<any, number> =>
+  arr.reduce((a: Map<any, number>, v: any) => a.set(v, (a.get(v) || 0) + 1), new Map())
+
 export const transposeArray = (a: Array2D) => {
   // if no rows, throw error
   if (!a.length) throw new Error('No rows passed to transposeArray.')
