@@ -45,8 +45,8 @@ export const makeNewReverb = (config?: ReverbConfig): Echo<'reverb'> => {
           data: { socket_id: socketId, channel_name: channel.name },
           headers: axiosJSONHeaders,
         })
-          .then(res => callback(false, res.data))
-          .catch(e => console.error(e)),
+          .then(r => callback(false, r.data))
+          .catch(e => callback(true, e.response)),
     }),
     broadcaster: broadcaster || 'reverb',
     options: { pusher: Pusher },
